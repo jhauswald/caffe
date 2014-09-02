@@ -1,13 +1,13 @@
 ## Caffe ported to run native on Xeon Phi
-The Caffe source code here is outdated. You should use the current version from here:
+The Caffe source code here is outdated. You should use the current version from here:  
 https://github.com/BVLC/caffe
 
 #### Instructions:
-See the Makefile and Makefile.config from here to compile for Xeon Phi
-https://github.com/ivankreso/caffe-xeon-phi/blob/master/Makefile
+See the Makefile and Makefile.config from here to compile for Xeon Phi  
+https://github.com/ivankreso/caffe-xeon-phi/blob/master/Makefile  
 https://github.com/ivankreso/caffe-xeon-phi/blob/master/Makefile.conf
 
-You will also need to cross-compile all the Caffe dependencies for Xeon Phi.
+You will also need to cross-compile all the Caffe dependencies for Xeon Phi.  
 Library sources and cross-compilation flags used are here:  
 https://github.com/ivankreso/caffe-deps-xeon-phi
 
