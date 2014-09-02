@@ -29,8 +29,10 @@ template <typename Dtype>
 Dtype AccuracyLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
     vector<Blob<Dtype>*>* top) {
   Dtype accuracy = 0;
+  printf("begin get bottom data\n");
   const Dtype* bottom_data = bottom[0]->cpu_data();
   const Dtype* bottom_label = bottom[1]->cpu_data();
+  printf("end get bottom data\n");
   int num = bottom[0]->num();
   int dim = bottom[0]->count() / bottom[0]->num();
   vector<Dtype> maxval(top_k_+1);

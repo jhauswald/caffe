@@ -119,6 +119,10 @@ void ConvolutionLayer<Dtype>::SetUp(const vector<Blob<Dtype>*>& bottom,
 template <typename Dtype>
 Dtype ConvolutionLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
       vector<Blob<Dtype>*>* top) {
+  printf("begin convolution\n");
+  printf("bottom.size() = %d\n", bottom.size());
+  printf("num_ = %d\n", num_);
+  printf("group_ = %d\n", group_);
   for (int i = 0; i < bottom.size(); ++i) {
     const Dtype* bottom_data = bottom[i]->cpu_data();
     Dtype* top_data = (*top)[i]->mutable_cpu_data();
@@ -127,6 +131,7 @@ Dtype ConvolutionLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
     int weight_offset = M_ * K_;
     int col_offset = K_ * N_;
     int top_offset = M_ * N_;
+    #pragma omp parallel for
     for (int n = 0; n < num_; ++n) {
       // First, im2col
       im2col_cpu(bottom_data + bottom[i]->offset(n), channels_, height_,
@@ -147,6 +152,7 @@ Dtype ConvolutionLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
       }
     }
   }
+  printf("end convolution\n");
   return Dtype(0.);
 }
 

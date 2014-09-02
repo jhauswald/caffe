@@ -178,6 +178,7 @@ void Solver<Dtype>::Solve(const char* resume_file) {
   // should be given, and we will just provide dummy vecs.
   vector<Blob<Dtype>*> bottom_vec;
   for (; iter_ < param_.max_iter(); ++iter_) {
+    printf("ITER = %d\n", iter_);
     // Save a snapshot if needed.
     if (param_.snapshot() && iter_ > start_iter &&
         iter_ % param_.snapshot() == 0) {
@@ -185,17 +186,22 @@ void Solver<Dtype>::Solve(const char* resume_file) {
     }
 
     if (param_.test_interval() && iter_ % param_.test_interval() == 0) {
+      printf("TestALL() - begin\n");
       TestAll();
+      printf("TestALL() - end\n");
     }
 
     const bool display = param_.display() && iter_ % param_.display() == 0;
     net_->set_debug_info(display && param_.debug_info());
+    printf("Dtype loss = net_->ForwardBackward(bottom_vec)\n");
     Dtype loss = net_->ForwardBackward(bottom_vec);
     if (display) {
       LOG(INFO) << "Iteration " << iter_ << ", loss = " << loss;
     }
 
+    printf("ComputeUpdateValue\n");
     ComputeUpdateValue();
+    printf("net_->Update\n");
     net_->Update();
   }
   // Always save a snapshot after optimization, unless overridden by setting
@@ -213,6 +219,7 @@ void Solver<Dtype>::Solve(const char* resume_file) {
     LOG(INFO) << "Iteration " << iter_ << ", loss = " << loss;
   }
   if (param_.test_interval() && iter_ % param_.test_interval() == 0) {
+    printf("TestALL()\n");
     TestAll();
   }
   LOG(INFO) << "Optimization Done.";
@@ -238,10 +245,13 @@ void Solver<Dtype>::Test(const int test_net_id) {
   vector<Dtype> test_score;
   vector<Blob<Dtype>*> bottom_vec;
   Dtype loss = 0;
+  //#pragma omp parallel for
   for (int i = 0; i < param_.test_iter(test_net_id); ++i) {
     Dtype iter_loss;
+    printf("Forward - begin\n");
     const vector<Blob<Dtype>*>& result =
         test_nets_[test_net_id]->Forward(bottom_vec, &iter_loss);
+    printf("Forward - end\n");
     if (param_.test_compute_loss()) {
       loss += iter_loss;
     }
@@ -254,7 +264,9 @@ void Solver<Dtype>::Test(const int test_net_id) {
       }
     } else {
       int idx = 0;
+      printf("result.size() = %d\n", result.size());
       for (int j = 0; j < result.size(); ++j) {
+        printf("result[j]->count() = %d\n", result[j]->count());
         const Dtype* result_vec = result[j]->cpu_data();
         for (int k = 0; k < result[j]->count(); ++k) {
           test_score[idx++] += result_vec[k];

@@ -335,6 +335,7 @@ unsigned int DataLayer<Dtype>::PrefetchRand() {
 template <typename Dtype>
 Dtype DataLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
       vector<Blob<Dtype>*>* top) {
+  printf("begin fetch data\n");
   // First, join the thread
   JoinPrefetchThread();
   // Copy the data
@@ -346,6 +347,7 @@ Dtype DataLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
   }
   // Start a new prefetch thread
   CreatePrefetchThread();
+  printf("end fetch data\n");
   return Dtype(0.);
 }
 
