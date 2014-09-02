@@ -157,10 +157,15 @@ ifneq ($(CPU_ONLY), 1)
 	LIBRARY_DIRS += $(CUDA_LIB_DIR)
 	LIBRARIES := cudart cublas curand
 endif
+#LIBRARIES += \
+#	glog gflags pthread protobuf leveldb snappy \
+#	lmdb \
+#	boost_system \
+#	hdf5_hl hdf5 \
+#	opencv_core opencv_highgui opencv_imgproc
 LIBRARIES += \
-	glog gflags pthread protobuf leveldb snappy \
+	glog gflags pthread protobuf leveldb \
 	lmdb \
-	boost_system \
 	hdf5_hl hdf5 \
 	opencv_core opencv_highgui opencv_imgproc
 PYTHON_LIBRARIES := boost_python python2.7
@@ -245,11 +250,12 @@ endif
 BLAS ?= atlas
 ifeq ($(BLAS), mkl)
 	# MKL
-	LIBRARIES += mkl_rt
+	#LIBRARIES += mkl_rt
+  	LIBRARIES += mkl_intel_lp64 mkl_intel_thread mkl_core
 	COMMON_FLAGS += -DUSE_MKL
 	MKL_DIR ?= /opt/intel/mkl
 	BLAS_INCLUDE ?= $(MKL_DIR)/include
-	BLAS_LIB ?= $(MKL_DIR)/lib $(MKL_DIR)/lib/intel64
+	BLAS_LIB ?= $(MKL_DIR)/lib $(MKL_DIR)/lib/mic/
 else ifeq ($(BLAS), open)
 	# OpenBLAS
 	LIBRARIES += blas
