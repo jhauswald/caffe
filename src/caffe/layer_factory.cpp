@@ -35,6 +35,26 @@ template ConvolutionLayer<float>* GetConvolutionLayer(const string& name,
     const LayerParameter& param);
 template ConvolutionLayer<double>* GetConvolutionLayer(const string& name,
     const LayerParameter& param);
+//
+// Get convolution layer according to engine.
+template <typename Dtype>
+LocalLayer<Dtype>* GetLocalLayer(const string& name,
+    const LayerParameter& param) {
+  LocalParameter_Engine engine = param.local_param().engine();
+  if (engine == LocalParameter_Engine_DEFAULT) {
+    engine = LocalParameter_Engine_CAFFE;
+  }
+  if (engine == LocalParameter_Engine_CAFFE) {
+    return new LocalLayer<Dtype>(param);
+  } else {
+    LOG(FATAL) << "Layer " << name << " has unknown engine.";
+  }
+}
+
+template LocalLayer<float>* GetLocalLayer(const string& name,
+    const LayerParameter& param);
+template LocalLayer<double>* GetLocalLayer(const string& name,
+    const LayerParameter& param);
 
 // Get pooling layer according to engine.
 template <typename Dtype>
@@ -144,6 +164,26 @@ template TanHLayer<float>* GetTanHLayer(const string& name,
 template TanHLayer<double>* GetTanHLayer(const string& name,
     const LayerParameter& param);
 
+// Get htanh layer according to engine.
+template <typename Dtype>
+HTanHLayer<Dtype>* GetHTanHLayer(const string& name,
+    const LayerParameter& param) {
+  HTanHParameter_Engine engine = param.htanh_param().engine();
+  if (engine == HTanHParameter_Engine_DEFAULT) {
+    engine = HTanHParameter_Engine_CAFFE;
+  }
+  if (engine == HTanHParameter_Engine_CAFFE) {
+    return new HTanHLayer<Dtype>(param);
+  } else {
+    LOG(FATAL) << "Layer " << name << " has unknown engine.";
+  }
+}
+
+template HTanHLayer<float>* GetHTanHLayer(const string& name,
+    const LayerParameter& param);
+template HTanHLayer<double>* GetHTanHLayer(const string& name,
+    const LayerParameter& param);
+
 // Get softmax layer according to engine.
 template <typename Dtype>
 SoftmaxLayer<Dtype>* GetSoftmaxLayer(const string& name,
@@ -193,6 +233,8 @@ Layer<Dtype>* GetLayer(const LayerParameter& param) {
     return new ContrastiveLossLayer<Dtype>(param);
   case LayerParameter_LayerType_CONVOLUTION:
     return GetConvolutionLayer<Dtype>(name, param);
+  case LayerParameter_LayerType_LOCAL:
+    return GetLocalLayer<Dtype>(name, param);
   case LayerParameter_LayerType_DATA:
     return new DataLayer<Dtype>(param);
   case LayerParameter_LayerType_DROPOUT:
@@ -249,6 +291,8 @@ Layer<Dtype>* GetLayer(const LayerParameter& param) {
     return new SplitLayer<Dtype>(param);
   case LayerParameter_LayerType_TANH:
     return GetTanHLayer<Dtype>(name, param);
+  case LayerParameter_LayerType_HTANH:
+    return GetHTanHLayer<Dtype>(name, param);
   case LayerParameter_LayerType_WINDOW_DATA:
     return new WindowDataLayer<Dtype>(param);
   case LayerParameter_LayerType_NONE:

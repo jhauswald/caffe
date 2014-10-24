@@ -498,6 +498,10 @@ LayerParameter_LayerType UpgradeV0LayerType(const string& type) {
     return LayerParameter_LayerType_SPLIT;
   } else if (type == "tanh") {
     return LayerParameter_LayerType_TANH;
+  } else if (type == "htanh") {
+    return LayerParameter_LayerType_HTANH;
+  } else if (type == "local") {
+    return LayerParameter_LayerType_LOCAL;
   } else if (type == "window_data") {
     return LayerParameter_LayerType_WINDOW_DATA;
   } else {
