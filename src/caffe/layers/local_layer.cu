@@ -8,8 +8,6 @@
 
 namespace caffe {
 
-
-
 template <typename Dtype>
 __global__ void local_update1_gpu_kernel(const Dtype* data_A, const Dtype* data_B,
                                     Dtype* data_R, const int filter_num,
@@ -81,8 +79,6 @@ template void local_update2_gpu<float>(const float* data_A, const float* data_B,
 template void local_update2_gpu<double>(const double* data_A, const double* data_B,
                        double* data_R, const int filter_num,
                        const int location_num, const int output_num);
-
-
 
 
 /// @brief refer to CPU forward -- the BLAS implementation is the same.
@@ -164,11 +160,11 @@ void LocalLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
     im2col_gpu(bottom_data + (*bottom)[0]->offset(n), channels_, height_,
                width_, kernel_size_, kernel_size_, pad_, pad_, stride_, stride_, x_data);
 
-    local_update1_gpu(top_diff+top[0]->offset(n), x_data, weight_diff, K_, N_, M_);
+    /* local_update1_gpu(top_diff+top[0]->offset(n), x_data, weight_diff, K_, N_, M_); */
 
     if (propagate_down[0]) {
       CUDA_CHECK(cudaMemset(x_diff, 0, col_buffer_.count() * sizeof(Dtype)));
-      local_update2_gpu(top_diff+top[0]->offset(n), weight, x_diff, K_, N_, M_);
+      /* local_update2_gpu(top_diff+top[0]->offset(n), weight, x_diff, K_, N_, M_); */
 
       // col2im back to the data
       col2im_gpu(x_diff, channels_, height_, width_, kernel_size_, kernel_size_,
