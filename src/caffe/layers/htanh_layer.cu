@@ -14,9 +14,9 @@ __global__ void HTanHForward(const int n, const Dtype* in, Dtype* out) {
   CUDA_KERNEL_LOOP(index, n) {
     if(in[index] < -1)
         out[index] = -1;
-    else if(bottom_data[i] > -1 && bottom_data[i] < 1)
+    else if(in[index] > -1 && in[index] < 1)
         out[index] = in[index];
-    else if(bottom_data[i] > 1)
+    else if(in[index] > 1)
         out[index] = 1;
   }
 }
