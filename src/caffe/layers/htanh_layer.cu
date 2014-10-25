@@ -12,12 +12,9 @@ namespace caffe {
 template <typename Dtype>
 __global__ void HTanHForward(const int n, const Dtype* in, Dtype* out) {
   CUDA_KERNEL_LOOP(index, n) {
-    if(in[index] < -1)
-        out[index] = -1;
-    else if(in[index] > -1 && in[index] < 1)
-        out[index] = in[index];
-    else if(in[index] > 1)
-        out[index] = 1;
+      out[index] = (in[index] < -1) ? -1 :
+                   (in[index] > 1) ? 1 :
+                   in[index]
   }
 }
 
