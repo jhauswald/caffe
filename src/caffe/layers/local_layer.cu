@@ -88,12 +88,12 @@ template void local_update2_gpu<double>(const double* data_A, const double* data
 /// @brief refer to CPU forward -- the BLAS implementation is the same.
 template <typename Dtype>
 void LocalLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
-      const vector<Blob<Dtype>*>* top) {
+      vector<Blob<Dtype>*>* top) {
 
   Dtype* x_data = col_buffer_.mutable_gpu_data();
   const Dtype* weight = this->blobs_[0]->gpu_data();
   const Dtype* bottom_data = bottom[0]->gpu_data();
-  Dtype* top_data = top[0]->mutable_gpu_data();
+  Dtype* top_data = (*top)[0]->mutable_gpu_data();
 
   Blob<Dtype> E;
   E.Reshape(1, 1, 1, K_);
@@ -114,13 +114,13 @@ void LocalLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
 
       caffe_gpu_gemm<Dtype>(CblasNoTrans, CblasNoTrans, 1, N_, K_,
                             (Dtype)1., E.gpu_data(), intermediate.gpu_data(),
-                            (Dtype)0., top_data + top[0]->offset(n, m));
+                            (Dtype)0., top_data + (*top)[0]->offset(n, m));
     }
 
     if (bias_term_) {
       caffe_gpu_add(M_ * N_, this->blobs_[1]->gpu_data(),
-                    top_data + top[0]->offset(n),
-                    top_data + top[0]->offset(n));
+                    top_data + (*top)[0]->offset(n),
+                    top_data + (*top)[0]->offset(n));
     }
   }
 
@@ -129,11 +129,11 @@ void LocalLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
 /// @brief refer to CPU backward -- the BLAS implementation is the same.
 template <typename Dtype>
 void LocalLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
-      const vector<bool>& propagate_down, const vector<Blob<Dtype>*>* bottom) {
+      const vector<bool>& propagate_down, vector<Blob<Dtype>*>* bottom) {
 
   const Dtype* top_diff = top[0]->gpu_diff();
-  const Dtype* bottom_data = bottom[0]->gpu_data();
-  Dtype* bottom_diff = bottom[0]->mutable_gpu_diff();
+  const Dtype* bottom_data = (*bottom)[0]->gpu_data();
+  Dtype* bottom_diff = (*bottom)[0]->mutable_gpu_diff();
   Dtype* x_data = col_buffer_.mutable_gpu_data();
   Dtype* x_diff = col_buffer_.mutable_gpu_diff();
   const Dtype* weight = this->blobs_[0]->gpu_data();
@@ -161,7 +161,7 @@ void LocalLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
   Dtype* buf_data = buf.mutable_gpu_data();
   CUDA_CHECK(cudaMemset(weight_diff, 0, sizeof(Dtype) * this->blobs_[0]->count()));
   for (int n=0; n<num_; n++) {
-    im2col_gpu(bottom_data + bottom[0]->offset(n), channels_, height_,
+    im2col_gpu(bottom_data + (*bottom)[0]->offset(n), channels_, height_,
                width_, kernel_size_, kernel_size_, pad_, pad_, stride_, stride_, x_data);
 
     local_update1_gpu(top_diff+top[0]->offset(n), x_data, weight_diff, K_, N_, M_);
@@ -172,13 +172,10 @@ void LocalLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
 
       // col2im back to the data
       col2im_gpu(x_diff, channels_, height_, width_, kernel_size_, kernel_size_,
-                 pad_, pad_, stride_, stride_, bottom_diff + bottom[0]->offset(n));
+                 pad_, pad_, stride_, stride_, bottom_diff + (*bottom)[0]->offset(n));
     }
   }
 }
-
-
-
 
 INSTANTIATE_LAYER_GPU_FUNCS(LocalLayer);
 
