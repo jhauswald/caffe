@@ -163,7 +163,7 @@ INCLUDE_DIRS += $(BUILD_INCLUDE_DIR) ./src ./include
 ifneq ($(CPU_ONLY), 1)
 	INCLUDE_DIRS += $(CUDA_INCLUDE_DIR)
 	LIBRARY_DIRS += $(CUDA_LIB_DIR)
-	LIBRARIES := cudart cublas curand
+	LIBRARIES := rt dl
 endif
 LIBRARIES += glog gflags protobuf leveldb snappy \
 	lmdb \
@@ -316,7 +316,11 @@ NVCCFLAGS += -ccbin=$(CXX) -Xcompiler -fPIC $(COMMON_FLAGS)
 MATLAB_CXXFLAGS := $(CXXFLAGS) -Wno-uninitialized
 LINKFLAGS += -fPIC $(COMMON_FLAGS) $(WARNINGS)
 LDFLAGS += $(foreach librarydir,$(LIBRARY_DIRS),-L$(librarydir)) \
-		$(foreach library,$(LIBRARIES),-l$(library))
+		$(foreach library,$(LIBRARIES),-l$(library)) \
+		/usr/local/cuda/lib64/libcudart_static.a \
+		/usr/local/cuda/lib64/libcublas_static.a \
+		/usr/local/cuda/lib64/libcurand_static.a \
+		/usr/local/cuda/lib64/libculibos.a
 PYTHON_LDFLAGS := $(LDFLAGS) $(foreach library,$(PYTHON_LIBRARIES),-l$(library))
 
 # 'superclean' target recursively* deletes all files ending with an extension
