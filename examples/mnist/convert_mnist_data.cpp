@@ -151,7 +151,7 @@ void convert_dataset(const char* image_filename, const char* label_filename,
 
       snprintf(filename, pathlen, "%s/%c/%05d.png", db_path, '0' + label, item_id);
       //std::cout << "writing " << filename << std::endl;
-      cv::imwrite(filename, img);
+      // cv::imwrite(filename, img);
     } else {
       LOG(FATAL) << "Unknown db backend " << db_backend;
     }
