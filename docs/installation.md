@@ -11,13 +11,15 @@ We have installed Caffe on Ubuntu 14.04, Ubuntu 12.04, OS X 10.9, and OS X 10.8.
 - [Compilation](#compilation)
 - [Hardware questions](#hardware_questions)
 
+Ask installation questions on the [caffe-users](https://groups.google.com/forum/#!forum/caffe-users) mailing list.
+
 ## Prerequisites
 
 Caffe depends on several software packages.
 
 * [CUDA](https://developer.nvidia.com/cuda-zone) library version 6.5 (recommended), 6.0, 5.5, or 5.0 and the latest driver version for CUDA 6 or 319.* for CUDA 5 (and NOT 331.*)
 * [BLAS](http://en.wikipedia.org/wiki/Basic_Linear_Algebra_Subprograms) (provided via ATLAS, MKL, or OpenBLAS).
-* [OpenCV](http://opencv.org/).
+* [OpenCV](http://opencv.org/) (>= 2.4)
 * [Boost](http://www.boost.org/) (>= 1.55, although only 1.55 and 1.56 are tested)
 * `glog`, `gflags`, `protobuf`, `leveldb`, `snappy`, `hdf5`, `lmdb`
 * For the Python wrapper
@@ -208,28 +210,39 @@ If you're not using Anaconda, include `hdf5` in the list above.
     Aborting
     Error: Failure while executing: git pull -q origin refs/heads/master:refs/remotes/origin/master
 
-One solution is to commit your changes to a separate Homebrew branch, run `brew update`, and rebase your changes onto the updated master, as follows:
+One solution is to commit your changes to a separate Homebrew branch, run `brew update`, and rebase your changes onto the updated master. You'll have to do this both for the main Homebrew repository in `/usr/local/` and the Homebrew science repository that contains OpenCV in  `/usr/local/Library/Taps/homebrew/homebrew-science`, as follows:
 
     cd /usr/local
     git checkout -b caffe
     git add .
     git commit -m "Update Caffe dependencies to use libstdc++"
+    cd /usr/local/Library/Taps/homebrew/homebrew-science
+    git checkout -b caffe
+    git add .
+    git commit -m "Update Caffe dependencies"
+
+Then, whenever you want to update homebrew, switch back to the master branches, do the update, rebase the caffe branches onto master and fix any conflicts:
+
+    # Switch batch to homebrew master branches
+    cd /usr/local
     git checkout master
+    cd /usr/local/Library/Taps/homebrew/homebrew-science
+    git checkout master
+
+    # Update homebrew; hopefully this works without errors!
     brew update
+
+    # Switch back to the caffe branches with the forumlae that you modified earlier
+    cd /usr/local
     git rebase master caffe
-    # Resolve any merge conflicts here
-    git checkout caffe
+    # Fix any merge conflicts and commit to caffe branch
+    cd /usr/local/Library/Taps/homebrew/homebrew-science
+    git rebase master caffe
+    # Fix any merge conflicts and commit to caffe branch
 
-At this point, you should be running the latest Homebrew packages and your Caffe-related modifications will remain in place. You may still get the following error:
+    # Done!
 
-    $ brew update
-    error: Your local changes to the following files would be overwritten by merge:
-	opencv.rb
-    Please, commit your changes or stash them before you can merge.
-    Aborting
-    Error: Failed to update tap: homebrew/science
-
-but non-OpenCV packages will still update as expected.
+At this point, you should be running the latest Homebrew packages and your Caffe-related modifications will remain in place.
 
 #### Windows
 
@@ -288,4 +301,4 @@ As a workaround, if you are using Ubuntu 12.04 you can try the following steps t
 
 Once installed, check your times against our [reference performance numbers](performance_hardware.html) to make sure everything is configured properly.
 
-Refer to the project's issue tracker for [hardware/compatibility](https://github.com/BVLC/caffe/issues?labels=hardware%2Fcompatibility&page=1&state=open).
+Ask hardware questions on the [caffe-users](https://groups.google.com/forum/#!forum/caffe-users) mailing list.
