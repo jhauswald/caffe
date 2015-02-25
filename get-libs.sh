@@ -14,3 +14,5 @@ make && make install
 git clone git://gitorious.org/mdb/mdb.git
 cd mdb/libraries/liblmdb
 make && make install
+
+apt-get install libprotobuf-dev libleveldb-dev libsnappy-dev libopencv-dev libboost-all-dev libhdf5-serial-dev
