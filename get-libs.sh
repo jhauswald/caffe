@@ -13,9 +13,13 @@ export CXXFLAGS="-fPIC" && cmake .. && make VERBOSE=1
 make && make install
 
 # lmdb
-git clone git://gitorious.org/mdb/mdb.git
+
+git clone https://gitorious.org/mdb/mdb.git
 cd mdb/libraries/liblmdb
 make && make install
 
-apt-get install libprotobuf-dev libleveldb-dev libsnappy-dev libopencv-dev \
-libboost-all-dev libhdf5-serial-dev
+apt-get install libprotobuf-dev libleveldb-dev libsnappy-dev \
+libboost-all-dev libhdf5-serial-dev libopenblas-dev
+
+# open blas installs to a subdirectory
+sudo cp /usr/lib/openblas-base/* /usr/lib
