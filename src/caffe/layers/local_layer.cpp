@@ -65,10 +65,14 @@ void LocalLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
 template <typename Dtype>
 void LocalLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom,
       vector<Blob<Dtype>*>* top) {
+  num_ = bottom[0]->num();
+  height_ = bottom[0]->height();
+  width_ = bottom[0]->width();
   CHECK_EQ(bottom[0]->channels(), channels_) << "Input size incompatible with"
     " weights.";
   // TODO: generalize to handle inputs of different shapes.
   for (int bottom_id = 1; bottom_id < bottom.size(); ++bottom_id) {
+    LOG(INFO) << "NUM: " << bottom[bottom_id]->num();
     CHECK_EQ(num_, bottom[bottom_id]->num()) << "Inputs must have same num.";
     CHECK_EQ(channels_, bottom[bottom_id]->channels())
         << "Inputs must have same channels.";
