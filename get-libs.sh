@@ -20,6 +20,3 @@ git clone https://gitorious.org/mdb/mdb.git
 cd mdb/libraries/liblmdb
 make && make install
 cd -
-
-apt-get install libprotobuf-dev libleveldb-dev libsnappy-dev \
-libboost-all-dev libhdf5-serial-dev libopenblas-dev
