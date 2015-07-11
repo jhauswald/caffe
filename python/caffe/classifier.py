@@ -15,7 +15,8 @@ class Classifier(caffe.Net):
     """
     def __init__(self, model_file, pretrained_file, image_dims=None,
                  gpu=False, mean=None, input_scale=None, raw_scale=None,
-                 channel_swap=None):
+                 channel_swap=None, forward_time="imc.cpu.intel.1.forward.csv",
+                 layer_time="imc.cpu.intel.1.layer.csv", app="imc", profile=True):
         """
         Take
         image_dims: dimensions to scale input for cropping/sampling.
@@ -45,24 +46,33 @@ class Classifier(caffe.Net):
             image_dims = self.crop_dims
         self.image_dims = image_dims
 
+        self.app = app
+        self.forward_time = forward_time
+        self.layer_time = layer_time
+        self.profile = profile
 
     def predict(self, inputs, oversample=True):
         """
         Predict classification probabilities of inputs.
 
-        Take
-        inputs: iterable of (H x W x K) input ndarrays.
-        oversample: average predictions across center, corners, and mirrors
-                    when True (default). Center-only prediction when False.
+        Parameters
+        ----------
+        inputs : iterable of (H x W x K) input ndarrays.
+        oversample : boolean
+            average predictions across center, corners, and mirrors
+            when True (default). Center-only prediction when False.
 
-        Give
-        predictions: (N x C) ndarray of class probabilities
-                     for N images and C classes.
+        Returns
+        -------
+        predictions: (N x C) ndarray of class probabilities for N images and C
+            classes.
         """
         # Scale to standardize input dimensions.
         input_ = np.zeros((len(inputs),
-            self.image_dims[0], self.image_dims[1], inputs[0].shape[2]),
-            dtype=np.float32)
+                           self.image_dims[0],
+                           self.image_dims[1],
+                           inputs[0].shape[2]),
+                          dtype=np.float32)
         for ix, in_ in enumerate(inputs):
             input_[ix] = caffe.io.resize_image(in_, self.image_dims)
 
@@ -79,7 +89,7 @@ class Classifier(caffe.Net):
             input_ = input_[:, crop[0]:crop[2], crop[1]:crop[3], :]
 
         # Classify
-        caffe_in = np.zeros(np.array(input_.shape)[[0,3,1,2]],
+        caffe_in = np.zeros(np.array(input_.shape)[[0, 3, 1, 2]],
                             dtype=np.float32)
         for ix, in_ in enumerate(input_):
             caffe_in[ix] = self.preprocess(self.inputs[0], in_)
