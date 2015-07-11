@@ -22,7 +22,9 @@ class Classifier(caffe.Net):
     """
     def __init__(self, model_file, pretrained_file, image_dims=None,
                  mean=None, input_scale=None, raw_scale=None,
-                 channel_swap=None):
+                 channel_swap=None, forward_time="imc.cpu.openblas.1.forward.csv",
+                 layer_time="imc.cpu.openblas.1.layer.csv", app="imc", profile=True):
+
         caffe.Net.__init__(self, model_file, pretrained_file, caffe.TEST)
 
         # configure pre-processing
@@ -43,6 +45,11 @@ class Classifier(caffe.Net):
         if not image_dims:
             image_dims = self.crop_dims
         self.image_dims = image_dims
+
+        self.app = app
+        self.forward_time = forward_time
+        self.layer_time = layer_time
+        self.profile = profile
 
     def predict(self, inputs, oversample=True):
         """

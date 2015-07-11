@@ -11,7 +11,9 @@ except:
 import numpy as np
 
 from ._caffe import Net, SGDSolver
-import caffe.io
+import caffe.io, os
+
+from datetime import datetime
 
 # We directly update methods from Net here (rather than using composition or
 # inheritance) so that nets created by caffe (e.g., by SGDSolver) will
@@ -92,11 +94,43 @@ def _Net_forward(self, blobs=None, start=None, end=None, **kwargs):
                 raise Exception('Input is not batch sized')
             self.blobs[in_].data[...] = blob
 
-    self._forward(start_ind, end_ind)
-
     # Unpack blobs to extract
-    return {out: self.blobs[out].data for out in outputs}
+    # relu and drop don't have blobs, get the closet ones behind
+    if self.profile:
+      lay = open(self.layer_time, "a")
+      if os.stat(self.layer_time).st_size == 0:
+        lay.write("layer,time\n")
 
+      start_t = datetime.now()
+      self._forward(start_ind, end_ind)
+      end_t = datetime.now()
+      lay_time = (end_t.second*1000.0 + end_t.microsecond/1000.0) - (start_t.second*1000.0 + start_t.microsecond/1000.0)
+      lay.write("%s,%.2f\n" % (start, float(lay_time)))
+      lay.close()
+
+      ok_layers = ['conv', 'fc', 'pool']
+      out = {}
+      out[start] = None
+      if "relu" in start or "drop" in start:
+        for i in range(start_ind, -1, -1):
+          if list(self._layer_names)[i] in ok_layers:
+            out[start] = self.blobs[list(self._layer_names)[i]].data
+      else:
+        out[start] = self.blobs[list(self._layer_names)[start_ind]].data
+
+      return out
+    else:
+      fwd = open(self.forward_time, "a")
+      if os.stat(self.forward_time).st_size == 0:
+        fwd.write("model,time\n")
+
+      start_fwd = datetime.now()
+      self._forward(start_ind, end_ind)
+      end_fwd = datetime.now()
+      fwd_time = (end_fwd.second*1000.0 + end_fwd.microsecond/1000.0) - (start_fwd.second*1000.0 + start_fwd.microsecond/1000.0)
+      fwd.write("%s,%.2f\n" % (self.app, float(fwd_time)))
+      fwd.close()
+      return {out: self.blobs[out].data for out in outputs}
 
 def _Net_backward(self, diffs=None, start=None, end=None, **kwargs):
     """
@@ -147,7 +181,6 @@ def _Net_backward(self, diffs=None, start=None, end=None, **kwargs):
     # Unpack diffs to extract
     return {out: self.blobs[out].diff for out in outputs}
 
-
 def _Net_forward_all(self, blobs=None, **kwargs):
     """
     Run net forward in batches.
@@ -165,9 +198,14 @@ def _Net_forward_all(self, blobs=None, **kwargs):
     # Collect outputs from batches
     all_outs = {out: [] for out in set(self.outputs + (blobs or []))}
     for batch in self._batch(kwargs):
+      if self.profile:
+        for idx,i in enumerate(self._layer_names):
+          outs = self.forward(blobs=blobs, start=i, end=i, **batch)
+      else:
         outs = self.forward(blobs=blobs, **batch)
-        for out, out_blob in outs.iteritems():
-            all_outs[out].extend(out_blob.copy())
+
+      for out, out_blob in outs.iteritems():
+          all_outs[out].extend(out_blob.copy())
     # Package in ndarray.
     for out in all_outs:
         all_outs[out] = np.asarray(all_outs[out])
@@ -177,7 +215,6 @@ def _Net_forward_all(self, blobs=None, **kwargs):
         for out in all_outs:
             all_outs[out] = all_outs[out][:-pad]
     return all_outs
-
 
 def _Net_forward_backward_all(self, blobs=None, diffs=None, **kwargs):
     """
