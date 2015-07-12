@@ -51,7 +51,7 @@ class Classifier(caffe.Net):
         self.layer_time = layer_time
         self.profile = profile
 
-    def predict(self, inputs, oversample=True):
+    def predict(self, inputs):
         """
         Predict classification probabilities of inputs.
 
@@ -73,20 +73,9 @@ class Classifier(caffe.Net):
                            self.image_dims[1],
                            inputs[0].shape[2]),
                           dtype=np.float32)
-        for ix, in_ in enumerate(inputs):
-            input_[ix] = caffe.io.resize_image(in_, self.image_dims)
-
-        if oversample:
-            # Generate center, corner, and mirrored crops.
-            input_ = caffe.io.oversample(input_, self.crop_dims)
-        else:
-            # Take center crop.
-            center = np.array(self.image_dims) / 2.0
-            crop = np.tile(center, (1, 2))[0] + np.concatenate([
-                -self.crop_dims / 2.0,
-                self.crop_dims / 2.0
-            ])
-            input_ = input_[:, crop[0]:crop[2], crop[1]:crop[3], :]
+        if self.app != "asr":
+          for ix, in_ in enumerate(inputs):
+              input_[ix] = caffe.io.resize_image(in_, self.image_dims)
 
         # Classify
         caffe_in = np.zeros(np.array(input_.shape)[[0, 3, 1, 2]],
@@ -95,10 +84,5 @@ class Classifier(caffe.Net):
             caffe_in[ix] = self.transformer.preprocess(self.inputs[0], in_)
         out = self.forward_all(**{self.inputs[0]: caffe_in})
         predictions = out[self.outputs[0]]
-
-        # For oversampling, average predictions across crops.
-        if oversample:
-            predictions = predictions.reshape((len(predictions) / 10, 10, -1))
-            predictions = predictions.mean(1)
 
         return predictions
