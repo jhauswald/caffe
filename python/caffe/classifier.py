@@ -5,7 +5,8 @@ Classifier is an image classifier specialization of Net.
 
 import numpy as np
 
-import caffe
+import caffe, os
+from datetime import datetime
 
 
 class Classifier(caffe.Net):
@@ -16,7 +17,8 @@ class Classifier(caffe.Net):
     def __init__(self, model_file, pretrained_file, image_dims=None,
                  gpu=False, mean=None, input_scale=None, raw_scale=None,
                  channel_swap=None, forward_time="imc.cpu.intel.1.forward.csv",
-                 layer_time="imc.cpu.intel.1.layer.csv", app="imc", profile=True):
+                 layer_time="imc.cpu.openblas.1.layer.csv", app="imc",
+                 profile=True, runs=1, warmup=True):
         """
         Take
         image_dims: dimensions to scale input for cropping/sampling.
@@ -50,6 +52,8 @@ class Classifier(caffe.Net):
         self.forward_time = forward_time
         self.layer_time = layer_time
         self.profile = profile
+        self.runs = runs
+        self.warmup = warmup
 
     def predict(self, inputs):
         """
@@ -73,16 +77,31 @@ class Classifier(caffe.Net):
                            self.image_dims[1],
                            inputs[0].shape[2]),
                           dtype=np.float32)
-        if self.app != "asr":
-          for ix, in_ in enumerate(inputs):
-              input_[ix] = caffe.io.resize_image(in_, self.image_dims)
+        for ix, in_ in enumerate(inputs):
+            input_[ix] = in_
 
         # Classify
         caffe_in = np.zeros(np.array(input_.shape)[[0, 3, 1, 2]],
                             dtype=np.float32)
         for ix, in_ in enumerate(input_):
             caffe_in[ix] = self.preprocess(self.inputs[0], in_)
-        out = self.forward_all(**{self.inputs[0]: caffe_in})
-        predictions = out[self.outputs[0]].squeeze(axis=(2,3))
+
+        fwd = open(self.forward_time, "a")
+        if os.stat(self.forward_time).st_size == 0:
+          fwd.write("model,time\n")
+
+        if self.warmup:
+          self.forward_all(**{self.inputs[0]: caffe_in})
+
+        start_fwd = datetime.now()
+        for i in range(0, self.runs):
+          out = self.forward_all(**{self.inputs[0]: caffe_in})
+        end_fwd = datetime.now()
+
+        fwd_time = float(((end_fwd.second*1000.0 + end_fwd.microsecond/1000.0) -
+          (start_fwd.second*1000.0 + start_fwd.microsecond/1000.0))/self.runs)
+        fwd.write("%s,%.2f\n" % (self.app, float(fwd_time)))
+        fwd.close()
+        predictions = out[self.outputs[0]]
 
         return predictions

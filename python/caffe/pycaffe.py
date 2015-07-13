@@ -105,17 +105,9 @@ def _Net_forward(self, blobs=None, start=None, end=None, **kwargs):
 
       return out
     else:
-      fwd = open(self.forward_time, "a")
-      if os.stat(self.forward_time).st_size == 0:
-        fwd.write("model,time\n")
-
-      start_fwd = datetime.now()
       self._forward(start_ind, end_ind)
-      end_fwd = datetime.now()
-      fwd_time = (end_fwd.second*1000.0 + end_fwd.microsecond/1000.0) - (start_fwd.second*1000.0 + start_fwd.microsecond/1000.0)
-      fwd.write("%s,%.2f\n" % (self.app, float(fwd_time)))
-      fwd.close()
       return {out: self.blobs[out].data for out in outputs}
+
 def _Net_backward(self, diffs=None, start=None, end=None, **kwargs):
     """
     Backward pass: prepare diffs and run the net backward.
