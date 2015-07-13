@@ -99,8 +99,9 @@ class Classifier(caffe.Net):
           out = self.forward_all(**{self.inputs[0]: caffe_in})
         end_fwd = datetime.now()
 
-        fwd_time = float(((end_fwd.second*1000.0 + end_fwd.microsecond/1000.0) -
-          (start_fwd.second*1000.0 + start_fwd.microsecond/1000.0))/self.runs)
+        diff = end_fwd - start_fwd
+        diff = diff.seconds*1000.0 + diff.microseconds/1000.0
+        fwd_time = diff / float(args.runs)
         fwd.write("%s,%.2f\n" % (self.app, float(fwd_time)))
         fwd.close()
         predictions = out[self.outputs[0]]
