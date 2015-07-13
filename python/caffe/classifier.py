@@ -77,7 +77,8 @@ class Classifier(caffe.Net):
                            self.image_dims[1],
                            inputs[0].shape[2]),
                           dtype=np.float32)
-        for ix, in_ in enumerate(inputs):
+        if self.app != "asr":
+          for ix, in_ in enumerate(inputs):
             input_[ix] = in_
 
         # Classify
