@@ -92,7 +92,6 @@ class Classifier(caffe.Net):
           self.forward_all(**{self.inputs[0]: caffe_in})
           self.warmup = False
 
-        print self.profile
         if self.profile:
           out = self.forward_all(**{self.inputs[0]: caffe_in})
         else:
