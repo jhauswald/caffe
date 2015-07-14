@@ -24,7 +24,7 @@ class Classifier(caffe.Net):
                  mean=None, input_scale=None, raw_scale=None,
                  channel_swap=None, forward_time="imc.cpu.openblas.1.forward.csv",
                  layer_time="imc.cpu.openblas.1.layer.csv", app="imc",
-                 profile=True, runs=1, warmup=True):
+                 profile=False, runs=1, warmup=True):
 
         caffe.Net.__init__(self, model_file, pretrained_file, caffe.TEST)
 
@@ -87,23 +87,29 @@ class Classifier(caffe.Net):
         for ix, in_ in enumerate(input_):
             caffe_in[ix] = self.transformer.preprocess(self.inputs[0], in_)
 
-        fwd = open(self.forward_time, "a")
-        if os.stat(self.forward_time).st_size == 0:
-          fwd.write("model,time\n")
 
         if self.warmup:
           self.forward_all(**{self.inputs[0]: caffe_in})
+          self.warmup = False
 
-        start_fwd = time.time()
-        for i in range(0, self.runs):
+        print self.profile
+        if self.profile:
           out = self.forward_all(**{self.inputs[0]: caffe_in})
-        end_fwd = time.time()
+        else:
+          start_fwd = time.time()
+          for i in range(0, self.runs):
+            out = self.forward_all(**{self.inputs[0]: caffe_in})
+          end_fwd = time.time()
 
-        diff = end_fwd - start_fwd
-        fwd_time = (diff / float(self.runs))*1000.0
+          fwd = open(self.forward_time, "a")
+          if os.stat(self.forward_time).st_size == 0:
+            fwd.write("model,time\n")
+          diff = end_fwd - start_fwd
+          fwd_time = (diff / float(self.runs))*1000.0
 
-        fwd.write("%s,%.2f\n" % (self.app, float(fwd_time)))
-        fwd.close()
+          fwd.write("%s,%.2f\n" % (self.app, float(fwd_time)))
+          fwd.close()
+
         predictions = out[self.outputs[0]]
 
         return predictions
