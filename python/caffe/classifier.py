@@ -6,8 +6,7 @@ Classifier is an image classifier specialization of Net.
 import numpy as np
 
 import caffe, os
-from datetime import datetime
-
+import time
 
 class Classifier(caffe.Net):
     """
@@ -95,14 +94,14 @@ class Classifier(caffe.Net):
         if self.warmup:
           self.forward_all(**{self.inputs[0]: caffe_in})
 
-        start_fwd = datetime.now()
+        start_fwd = time.time()
         for i in range(0, self.runs):
           out = self.forward_all(**{self.inputs[0]: caffe_in})
-        end_fwd = datetime.now()
+        end_fwd = time.time()
 
         diff = end_fwd - start_fwd
-        diff = diff.seconds*1000.0 + diff.microseconds/1000.0
-        fwd_time = diff / float(args.runs)
+        fwd_time = (diff / float(self.runs))*1000.0
+
         fwd.write("%s,%.2f\n" % (self.app, float(fwd_time)))
         fwd.close()
         predictions = out[self.outputs[0]]
