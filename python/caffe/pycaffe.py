@@ -8,9 +8,8 @@ from itertools import izip_longest
 import numpy as np
 
 from ._caffe import Net, SGDSolver
-import caffe.io, os
+import caffe.io, os, time
 
-from datetime import datetime
 
 # We directly update methods from Net here (rather than using composition or
 # inheritance) so that nets created by caffe (e.g., by SGDSolver) will
@@ -82,17 +81,7 @@ def _Net_forward(self, blobs=None, start=None, end=None, **kwargs):
     # Unpack blobs to extract
     # relu and drop don't have blobs, get the closet ones behind
     if self.profile:
-      lay = open(self.layer_time, "a")
-      if os.stat(self.layer_time).st_size == 0:
-        lay.write("layer,time\n")
-
-      start_t = datetime.now()
       self._forward(start_ind, end_ind)
-      end_t = datetime.now()
-      lay_time = (end_t.second*1000.0 + end_t.microsecond/1000.0) - (start_t.second*1000.0 + start_t.microsecond/1000.0)
-      lay.write("%s,%.2f\n" % (start, float(lay_time)))
-      lay.close()
-
       ok_layers = ['conv', 'fc', 'pool']
       out = {}
       out[start] = None
@@ -171,13 +160,32 @@ def _Net_forward_all(self, blobs=None, **kwargs):
     all_outs = {out: [] for out in set(self.outputs + (blobs or []))}
     for batch in self._batch(kwargs):
       if self.profile:
-        for idx,i in enumerate(self._layer_names):
-          outs = self.forward(blobs=blobs, start=i, end=i, **batch)
+        for r in range(0, self.runs):
+          for idx,i in enumerate(self._layer_names):
+            start_t = time.time()
+            outs = self.forward(blobs=blobs, start=i, end=i, **batch)
+            end_t = time.time()
+            lay_time = (end_t - start_t)*1000.0
+            if i in lays:
+              lays[i] += lay_time
+            else:
+              lays[i] = lay_time
+
       else:
         outs = self.forward(blobs=blobs, **batch)
 
       for out, out_blob in outs.iteritems():
           all_outs[out].extend(out_blob.copy())
+
+    # write out lay time
+    if self.profile and not self.warmup:
+      lay = open(self.layer_time, "a")
+      if os.stat(self.layer_time).st_size == 0:
+        lay.write("layer,time\n")
+      for k in lays:
+        lay.write("%s,%.2f\n" % (k, lays[k]/float(self.runs)))
+      lay.close()
+
     # Package in ndarray.
     for out in all_outs:
         all_outs[out] = np.asarray(all_outs[out])

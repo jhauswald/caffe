@@ -86,22 +86,28 @@ class Classifier(caffe.Net):
         for ix, in_ in enumerate(input_):
             caffe_in[ix] = self.preprocess(self.inputs[0], in_)
 
-        fwd = open(self.forward_time, "a")
-        if os.stat(self.forward_time).st_size == 0:
-          fwd.write("model,time\n")
 
         if self.warmup:
           self.forward_all(**{self.inputs[0]: caffe_in})
+          self.warmup = False
 
-        start_fwd = time.time()
-        for i in range(0, self.runs):
+        if self.profile:
           out = self.forward_all(**{self.inputs[0]: caffe_in})
-        end_fwd = time.time()
+        else:
+          start_fwd = time.time()
+          for i in range(0, self.runs):
+            out = self.forward_all(**{self.inputs[0]: caffe_in})
+          end_fwd = time.time()
 
-        diff = end_fwd - start_fwd
-        fwd_time = (diff / float(self.runs))*1000.0
-        fwd.write("%s,%.2f\n" % (self.app, float(fwd_time)))
-        fwd.close()
+          fwd = open(self.forward_time, "a")
+          if os.stat(self.forward_time).st_size == 0:
+            fwd.write("model,time\n")
+          diff = end_fwd - start_fwd
+          fwd_time = (diff / float(self.runs))*1000.0
+
+          fwd.write("%s,%.2f\n" % (self.app, float(fwd_time)))
+          fwd.close()
+
         predictions = out[self.outputs[0]]
 
         return predictions
