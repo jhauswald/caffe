@@ -89,6 +89,7 @@ class Classifier(caffe.Net):
 
 
         if self.warmup:
+          print "Throwing away first run"
           self.forward_all(**{self.inputs[0]: caffe_in})
           self.warmup = False
 
