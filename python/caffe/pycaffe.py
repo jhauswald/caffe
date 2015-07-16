@@ -199,7 +199,7 @@ def _Net_forward_all(self, blobs=None, **kwargs):
 
     # write out lay time
     if self.profile and not self.warmup:
-      lay = open(self.layer_time, "a")
+      lay = open(self.layer_time, "w")
       if os.stat(self.layer_time).st_size == 0:
         lay.write("layer,time\n")
       for k in lays:
