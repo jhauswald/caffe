@@ -165,9 +165,9 @@ endif
 #	opencv_core opencv_highgui opencv_imgproc
 LIBRARIES += \
 	glog gflags pthread protobuf leveldb \
-	lmdb \
 	hdf5_hl hdf5 \
-	opencv_core opencv_highgui opencv_imgproc
+	opencv_core opencv_highgui opencv_imgproc \
+	imf irng intlc svml iomp5
 PYTHON_LIBRARIES := boost_python python2.7
 WARNINGS := -Wall -Wno-sign-compare
 

@@ -16,7 +16,7 @@
 #include <glog/logging.h>
 #include <leveldb/db.h>
 #include <leveldb/write_batch.h>
-#include <lmdb.h>
+// #include <lmdb.h>
 #include <sys/stat.h>
 
 #include <algorithm>
@@ -83,10 +83,10 @@ int main(int argc, char** argv) {
 
   // Open new db
   // lmdb
-  MDB_env *mdb_env;
-  MDB_dbi mdb_dbi;
-  MDB_val mdb_key, mdb_data;
-  MDB_txn *mdb_txn;
+  // MDB_env *mdb_env;
+  // MDB_dbi mdb_dbi;
+  // MDB_val mdb_key, mdb_data;
+  // MDB_txn *mdb_txn;
   // leveldb
   leveldb::DB* db;
   leveldb::Options options;
@@ -103,18 +103,19 @@ int main(int argc, char** argv) {
     CHECK(status.ok()) << "Failed to open leveldb " << argv[arg_offset+3];
     batch = new leveldb::WriteBatch();
   } else if (db_backend == "lmdb") {  // lmdb
-    LOG(INFO) << "Opening lmdb " << argv[arg_offset+3];
-    CHECK_EQ(mkdir(argv[arg_offset+3], 0744), 0)
-        << "mkdir " << argv[arg_offset+3] << "failed";
-    CHECK_EQ(mdb_env_create(&mdb_env), MDB_SUCCESS) << "mdb_env_create failed";
-    CHECK_EQ(mdb_env_set_mapsize(mdb_env, 1099511627776), MDB_SUCCESS)  // 1TB
-        << "mdb_env_set_mapsize failed";
-    CHECK_EQ(mdb_env_open(mdb_env, argv[3], 0, 0664), MDB_SUCCESS)
-        << "mdb_env_open failed";
-    CHECK_EQ(mdb_txn_begin(mdb_env, NULL, 0, &mdb_txn), MDB_SUCCESS)
-        << "mdb_txn_begin failed";
-    CHECK_EQ(mdb_open(mdb_txn, NULL, 0, &mdb_dbi), MDB_SUCCESS)
-        << "mdb_open failed";
+      LOG(FATAL) << "MDB Removed!!";
+    // LOG(INFO) << "Opening lmdb " << argv[arg_offset+3];
+    // CHECK_EQ(mkdir(argv[arg_offset+3], 0744), 0)
+    //     << "mkdir " << argv[arg_offset+3] << "failed";
+    // CHECK_EQ(mdb_env_create(&mdb_env), MDB_SUCCESS) << "mdb_env_create failed";
+    // CHECK_EQ(mdb_env_set_mapsize(mdb_env, 1099511627776), MDB_SUCCESS)  // 1TB
+    //     << "mdb_env_set_mapsize failed";
+    // CHECK_EQ(mdb_env_open(mdb_env, argv[3], 0, 0664), MDB_SUCCESS)
+    //     << "mdb_env_open failed";
+    // CHECK_EQ(mdb_txn_begin(mdb_env, NULL, 0, &mdb_txn), MDB_SUCCESS)
+    //     << "mdb_txn_begin failed";
+    // CHECK_EQ(mdb_open(mdb_txn, NULL, 0, &mdb_dbi), MDB_SUCCESS)
+    //     << "mdb_open failed";
   } else {
     LOG(FATAL) << "Unknown db backend " << db_backend;
   }
@@ -152,12 +153,13 @@ int main(int argc, char** argv) {
     if (db_backend == "leveldb") {  // leveldb
       batch->Put(keystr, value);
     } else if (db_backend == "lmdb") {  // lmdb
-      mdb_data.mv_size = value.size();
-      mdb_data.mv_data = reinterpret_cast<void*>(&value[0]);
-      mdb_key.mv_size = keystr.size();
-      mdb_key.mv_data = reinterpret_cast<void*>(&keystr[0]);
-      CHECK_EQ(mdb_put(mdb_txn, mdb_dbi, &mdb_key, &mdb_data, 0), MDB_SUCCESS)
-          << "mdb_put failed";
+      LOG(FATAL) << "MDB Removed!!";
+      // mdb_data.mv_size = value.size();
+      // mdb_data.mv_data = reinterpret_cast<void*>(&value[0]);
+      // mdb_key.mv_size = keystr.size();
+      // mdb_key.mv_data = reinterpret_cast<void*>(&keystr[0]);
+      // CHECK_EQ(mdb_put(mdb_txn, mdb_dbi, &mdb_key, &mdb_data, 0), MDB_SUCCESS)
+      //     << "mdb_put failed";
     } else {
       LOG(FATAL) << "Unknown db backend " << db_backend;
     }
@@ -169,10 +171,11 @@ int main(int argc, char** argv) {
         delete batch;
         batch = new leveldb::WriteBatch();
       } else if (db_backend == "lmdb") {  // lmdb
-        CHECK_EQ(mdb_txn_commit(mdb_txn), MDB_SUCCESS)
-            << "mdb_txn_commit failed";
-        CHECK_EQ(mdb_txn_begin(mdb_env, NULL, 0, &mdb_txn), MDB_SUCCESS)
-            << "mdb_txn_begin failed";
+      LOG(FATAL) << "MDB Removed!!";
+        // CHECK_EQ(mdb_txn_commit(mdb_txn), MDB_SUCCESS)
+        //     << "mdb_txn_commit failed";
+        // CHECK_EQ(mdb_txn_begin(mdb_env, NULL, 0, &mdb_txn), MDB_SUCCESS)
+        //     << "mdb_txn_begin failed";
       } else {
         LOG(FATAL) << "Unknown db backend " << db_backend;
       }
@@ -186,9 +189,10 @@ int main(int argc, char** argv) {
       delete batch;
       delete db;
     } else if (db_backend == "lmdb") {  // lmdb
-      CHECK_EQ(mdb_txn_commit(mdb_txn), MDB_SUCCESS) << "mdb_txn_commit failed";
-      mdb_close(mdb_env, mdb_dbi);
-      mdb_env_close(mdb_env);
+      LOG(FATAL) << "MDB Removed!!";
+      // CHECK_EQ(mdb_txn_commit(mdb_txn), MDB_SUCCESS) << "mdb_txn_commit failed";
+      // mdb_close(mdb_env, mdb_dbi);
+      // mdb_env_close(mdb_env);
     } else {
       LOG(FATAL) << "Unknown db backend " << db_backend;
     }

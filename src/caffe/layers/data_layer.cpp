@@ -47,10 +47,11 @@ void DataLayer<Dtype>::InternalThreadEntry() {
       datum.ParseFromString(iter_->value().ToString());
       break;
     case DataParameter_DB_LMDB:
-      CHECK_EQ(mdb_cursor_get(mdb_cursor_, &mdb_key_,
-              &mdb_value_, MDB_GET_CURRENT), MDB_SUCCESS);
-      datum.ParseFromArray(mdb_value_.mv_data,
-          mdb_value_.mv_size);
+      // CHECK_EQ(mdb_cursor_get(mdb_cursor_, &mdb_key_,
+      //         &mdb_value_, MDB_GET_CURRENT), MDB_SUCCESS);
+      // datum.ParseFromArray(mdb_value_.mv_data,
+      //     mdb_value_.mv_size);
+      LOG(FATAL) << "MDB Removed!!";
       break;
     default:
       LOG(FATAL) << "Unknown database backend";
@@ -127,13 +128,14 @@ void DataLayer<Dtype>::InternalThreadEntry() {
       }
       break;
     case DataParameter_DB_LMDB:
-      if (mdb_cursor_get(mdb_cursor_, &mdb_key_,
-              &mdb_value_, MDB_NEXT) != MDB_SUCCESS) {
-        // We have reached the end. Restart from the first.
-        DLOG(INFO) << "Restarting data prefetching from start.";
-        CHECK_EQ(mdb_cursor_get(mdb_cursor_, &mdb_key_,
-                &mdb_value_, MDB_FIRST), MDB_SUCCESS);
-      }
+      LOG(FATAL) << "MDB Removed!!";
+      // if (mdb_cursor_get(mdb_cursor_, &mdb_key_,
+      //         &mdb_value_, MDB_NEXT) != MDB_SUCCESS) {
+      //   // We have reached the end. Restart from the first.
+      //   DLOG(INFO) << "Restarting data prefetching from start.";
+      //   CHECK_EQ(mdb_cursor_get(mdb_cursor_, &mdb_key_,
+      //           &mdb_value_, MDB_FIRST), MDB_SUCCESS);
+      // }
       break;
     default:
       LOG(FATAL) << "Unknown database backend";
@@ -149,10 +151,11 @@ DataLayer<Dtype>::~DataLayer<Dtype>() {
   case DataParameter_DB_LEVELDB:
     break;  // do nothing
   case DataParameter_DB_LMDB:
-    mdb_cursor_close(mdb_cursor_);
-    mdb_close(mdb_env_, mdb_dbi_);
-    mdb_txn_abort(mdb_txn_);
-    mdb_env_close(mdb_env_);
+    LOG(FATAL) << "MDB Removed!!";
+    // mdb_cursor_close(mdb_cursor_);
+    // mdb_close(mdb_env_, mdb_dbi_);
+    // mdb_txn_abort(mdb_txn_);
+    // mdb_env_close(mdb_env_);
     break;
   default:
     LOG(FATAL) << "Unknown database backend";
@@ -188,20 +191,21 @@ void DataLayer<Dtype>::SetUp(const vector<Blob<Dtype>*>& bottom,
     }
     break;
   case DataParameter_DB_LMDB:
-    CHECK_EQ(mdb_env_create(&mdb_env_), MDB_SUCCESS) << "mdb_env_create failed";
-    CHECK_EQ(mdb_env_set_mapsize(mdb_env_, 1099511627776), MDB_SUCCESS);  // 1TB
-    CHECK_EQ(mdb_env_open(mdb_env_,
-             this->layer_param_.data_param().source().c_str(),
-             MDB_RDONLY|MDB_NOTLS, 0664), MDB_SUCCESS) << "mdb_env_open failed";
-    CHECK_EQ(mdb_txn_begin(mdb_env_, NULL, MDB_RDONLY, &mdb_txn_), MDB_SUCCESS)
-        << "mdb_txn_begin failed";
-    CHECK_EQ(mdb_open(mdb_txn_, NULL, 0, &mdb_dbi_), MDB_SUCCESS)
-        << "mdb_open failed";
-    CHECK_EQ(mdb_cursor_open(mdb_txn_, mdb_dbi_, &mdb_cursor_), MDB_SUCCESS)
-        << "mdb_cursor_open failed";
-    LOG(INFO) << "Opening lmdb " << this->layer_param_.data_param().source();
-    CHECK_EQ(mdb_cursor_get(mdb_cursor_, &mdb_key_, &mdb_value_, MDB_FIRST),
-        MDB_SUCCESS) << "mdb_cursor_get failed";
+    LOG(FATAL) << "MDB Removed!!";
+    // CHECK_EQ(mdb_env_create(&mdb_env_), MDB_SUCCESS) << "mdb_env_create failed";
+    // CHECK_EQ(mdb_env_set_mapsize(mdb_env_, 1099511627776), MDB_SUCCESS);  // 1TB
+    // CHECK_EQ(mdb_env_open(mdb_env_,
+    //          this->layer_param_.data_param().source().c_str(),
+    //          MDB_RDONLY|MDB_NOTLS, 0664), MDB_SUCCESS) << "mdb_env_open failed";
+    // CHECK_EQ(mdb_txn_begin(mdb_env_, NULL, MDB_RDONLY, &mdb_txn_), MDB_SUCCESS)
+    //     << "mdb_txn_begin failed";
+    // CHECK_EQ(mdb_open(mdb_txn_, NULL, 0, &mdb_dbi_), MDB_SUCCESS)
+    //     << "mdb_open failed";
+    // CHECK_EQ(mdb_cursor_open(mdb_txn_, mdb_dbi_, &mdb_cursor_), MDB_SUCCESS)
+    //     << "mdb_cursor_open failed";
+    // LOG(INFO) << "Opening lmdb " << this->layer_param_.data_param().source();
+    // CHECK_EQ(mdb_cursor_get(mdb_cursor_, &mdb_key_, &mdb_value_, MDB_FIRST),
+    //     MDB_SUCCESS) << "mdb_cursor_get failed";
     break;
   default:
     LOG(FATAL) << "Unknown database backend";
@@ -221,11 +225,12 @@ void DataLayer<Dtype>::SetUp(const vector<Blob<Dtype>*>& bottom,
         }
         break;
       case DataParameter_DB_LMDB:
-        if (mdb_cursor_get(mdb_cursor_, &mdb_key_, &mdb_value_, MDB_NEXT)
-            != MDB_SUCCESS) {
-          CHECK_EQ(mdb_cursor_get(mdb_cursor_, &mdb_key_, &mdb_value_,
-                   MDB_FIRST), MDB_SUCCESS);
-        }
+      LOG(FATAL) << "MDB Removed!!";
+        // if (mdb_cursor_get(mdb_cursor_, &mdb_key_, &mdb_value_, MDB_NEXT)
+        //     != MDB_SUCCESS) {
+        //   CHECK_EQ(mdb_cursor_get(mdb_cursor_, &mdb_key_, &mdb_value_,
+        //            MDB_FIRST), MDB_SUCCESS);
+        // }
         break;
       default:
         LOG(FATAL) << "Unknown database backend";
@@ -239,7 +244,8 @@ void DataLayer<Dtype>::SetUp(const vector<Blob<Dtype>*>& bottom,
     datum.ParseFromString(iter_->value().ToString());
     break;
   case DataParameter_DB_LMDB:
-    datum.ParseFromArray(mdb_value_.mv_data, mdb_value_.mv_size);
+      LOG(FATAL) << "MDB Removed!!";
+    // datum.ParseFromArray(mdb_value_.mv_data, mdb_value_.mv_size);
     break;
   default:
     LOG(FATAL) << "Unknown database backend";
