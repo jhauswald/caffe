@@ -113,7 +113,6 @@ void PoolingLayer<Dtype>::SetUp(const vector<Blob<Dtype>*>& bottom,
 template <typename Dtype>
 Dtype PoolingLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
       vector<Blob<Dtype>*>* top) {
-  printf("begin pooling\n");
   const Dtype* bottom_data = bottom[0]->cpu_data();
   Dtype* top_data = (*top)[0]->mutable_cpu_data();
   const int top_count = (*top)[0]->count();
@@ -213,7 +212,6 @@ Dtype PoolingLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
   default:
     LOG(FATAL) << "Unknown pooling method.";
   }
-  printf("end pooling\n");
   return Dtype(0.);
 }
 
