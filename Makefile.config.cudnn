@@ -2,10 +2,10 @@
 # Contributions simplifying and improving our build system are welcome!
 
 # cuDNN acceleration switch (uncomment to build with cuDNN).
-# USE_CUDNN := 1
+USE_CUDNN := 1
 
 # CPU-only switch (uncomment to build without GPU support).
-CPU_ONLY := 1
+# CPU_ONLY := 1
 
 # To customize your choice of compiler, uncomment and set the following.
 # N.B. the default for Linux is g++ and the default for OSX is clang++
@@ -30,12 +30,12 @@ CUDA_ARCH := -gencode arch=compute_20,code=sm_20 \
 # atlas for ATLAS (default)
 # mkl for MKL
 # open for OpenBlas
-BLAS := mkl
+BLAS := open
 # Custom (MKL/ATLAS/OpenBLAS) include and lib directories.
 # Leave commented to accept the defaults for your choice of BLAS
 # (which should work)!
-BLAS_INCLUDE := /opt/intel/composer_xe_2015.3.187/mkl/include
-BLAS_LIB := /opt/intel/mkl/lib/intel64 /opt/intel/composer_xe_2015.3.187/compiler/lib/intel64/
+# BLAS_INCLUDE := /opt/intel/composer_xe_2015.3.187/mkl/include
+# BLAS_LIB := /opt/intel/mkl/lib/intel64 /opt/intel/composer_xe_2015.3.187/compiler/lib/intel64/
 
 # Homebrew puts openblas in a directory that is not on the standard search path
 # BLAS_INCLUDE := $(shell brew --prefix openblas)/include
@@ -85,8 +85,8 @@ LIBRARY_DIRS := $(PYTHON_LIB) /home/jahausw/cudnnv2 \
 # (Usually not necessary -- OpenCV libraries are normally installed in one of the above $LIBRARY_DIRS.)
 # USE_PKG_CONFIG := 1
 
-BUILD_DIR := build-mkl
-DISTRIBUTE_DIR := distribute-mkl
+BUILD_DIR := build-cudnn
+DISTRIBUTE_DIR := distribute-cudnn
 
 # Uncomment for debugging. Does not work on OSX due to https://github.com/BVLC/caffe/issues/171
 # DEBUG := 1
