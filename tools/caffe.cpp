@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 
+#include "boost/algorithm/string.hpp"
 #include "caffe/caffe.hpp"
 
 using caffe::Blob;
@@ -76,6 +77,19 @@ int device_query() {
 }
 RegisterBrewFunction(device_query);
 
+// Load the weights from the specified caffemodel(s) into the train and
+// test nets.
+void CopyLayers(caffe::Solver<float>* solver, const std::string& model_list) {
+  std::vector<std::string> model_names;
+  boost::split(model_names, model_list, boost::is_any_of(",") );
+  for (int i = 0; i < model_names.size(); ++i) {
+    LOG(INFO) << "Finetuning from " << model_names[i];
+    solver->net()->CopyTrainedLayersFrom(model_names[i]);
+    for (int j = 0; j < solver->test_nets().size(); ++j) {
+      solver->test_nets()[j]->CopyTrainedLayersFrom(model_names[i]);
+    }
+  }
+}
 
 // Train / Finetune a model.
 int train() {
@@ -112,8 +126,7 @@ int train() {
     LOG(INFO) << "Resuming from " << FLAGS_snapshot;
     solver->Solve(FLAGS_snapshot);
   } else if (FLAGS_weights.size()) {
-    LOG(INFO) << "Finetuning from " << FLAGS_weights;
-    solver->net()->CopyTrainedLayersFrom(FLAGS_weights);
+    CopyLayers(&*solver, FLAGS_weights);
     solver->Solve();
   } else {
     solver->Solve();
@@ -174,8 +187,8 @@ int test() {
   for (int i = 0; i < test_score.size(); ++i) {
     const std::string& output_name = caffe_net.blob_names()[
         caffe_net.output_blob_indices()[test_score_output_id[i]]];
-    const float loss_weight =
-        caffe_net.blob_loss_weights()[caffe_net.output_blob_indices()[i]];
+    const float loss_weight = caffe_net.blob_loss_weights()[
+        caffe_net.output_blob_indices()[test_score_output_id[i]]];
     std::ostringstream loss_msg_stream;
     const float mean_score = test_score[i] / FLAGS_iterations;
     if (loss_weight) {
@@ -239,9 +252,6 @@ int time() {
     forward_timer.Start();
     for (int i = 0; i < layers.size(); ++i) {
       timer.Start();
-      // Although Reshape should be essentially free, we include it here
-      // so that we will notice Reshape performance bugs.
-      layers[i]->Reshape(bottom_vecs[i], top_vecs[i]);
       layers[i]->Forward(bottom_vecs[i], top_vecs[i]);
       forward_time_per_layer[i] += timer.MicroSeconds();
     }
