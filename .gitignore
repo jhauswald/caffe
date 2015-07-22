@@ -64,10 +64,11 @@ models/*
 *lmdb
 
 # build, distribute, and bins (+ python proto bindings)
-build
-.build_debug/*
-.build_release/*
-distribute/*
+build*
+.build_debug*/*
+.build_release*/*
+.build-*/*
+distribute*/*
 *.testbin
 *.bin
 python/caffe/proto/
