@@ -88,9 +88,10 @@ class Classifier(caffe.Net):
 
 
         if self.warmup:
-          print "Throwing away first run"
+          print "Throwing away first run and returning"
           self.forward_all(**{self.inputs[0]: caffe_in})
           self.warmup = False
+          return
 
         if self.profile:
           out = self.forward_all(**{self.inputs[0]: caffe_in})
