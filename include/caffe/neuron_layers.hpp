@@ -658,7 +658,7 @@ class ThresholdLayer : public NeuronLayer<Dtype> {
   /// @brief Not implemented (non-differentiable function)
   virtual void Backward_cpu(const vector<Blob<Dtype>*>& top,
       const vector<bool>& propagate_down, vector<Blob<Dtype>*>* bottom) {
-    NOT_IMPLEMENTED;
+    NOT_IMPLMENTED_YET;
   }
 
   Dtype threshold_;
