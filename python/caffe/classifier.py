@@ -77,7 +77,7 @@ class Classifier(caffe.Net):
                            inputs[0].shape[2]),
                           dtype=np.float32)
 
-        if self.app != "asr":
+        if self.app == "imc" or self.app == "dig":
           for ix, in_ in enumerate(inputs):
             input_[ix] = in_
 
