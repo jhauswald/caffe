@@ -157,6 +157,22 @@ shared_ptr<Layer<Dtype> > GetTanHLayer(const LayerParameter& param) {
 
 REGISTER_LAYER_CREATOR(TanH, GetTanHLayer);
 
+// Get htanh layer according to engine.
+template <typename Dtype>
+shared_ptr<Layer<Dtype> > GetHTanHLayer(const LayerParameter& param) {
+  HTanHParameter_Engine engine = param.htanh_param().engine();
+  if (engine == HTanHParameter_Engine_DEFAULT) {
+    engine = HTanHParameter_Engine_CAFFE;
+  }
+  if (engine == HTanHParameter_Engine_CAFFE) {
+    return shared_ptr<Layer<Dtype> >(new HTanHLayer<Dtype>(param));
+  } else {
+    LOG(FATAL) << "Layer " << param.name() << " has unknown engine.";
+  }
+}
+
+REGISTER_LAYER_CREATOR(HTanH, GetHTanHLayer);
+
 #ifdef WITH_PYTHON_LAYER
 template <typename Dtype>
 shared_ptr<Layer<Dtype> > GetPythonLayer(const LayerParameter& param) {

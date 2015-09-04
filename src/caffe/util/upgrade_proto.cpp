@@ -514,6 +514,8 @@ V1LayerParameter_LayerType UpgradeV0LayerType(const string& type) {
     return V1LayerParameter_LayerType_SPLIT;
   } else if (type == "tanh") {
     return V1LayerParameter_LayerType_TANH;
+  } else if (type == "htanh") {
+    return V1LayerParameter_LayerType_HTANH;
   } else if (type == "window_data") {
     return V1LayerParameter_LayerType_WINDOW_DATA;
   } else {
@@ -812,6 +814,10 @@ bool UpgradeV1LayerParameter(const V1LayerParameter& v1_layer_param,
     layer_param->mutable_tanh_param()->CopyFrom(
         v1_layer_param.tanh_param());
   }
+  if (v1_layer_param.has_htanh_param()) {
+    layer_param->mutable_htanh_param()->CopyFrom(
+        v1_layer_param.htanh_param());
+  }
   if (v1_layer_param.has_threshold_param()) {
     layer_param->mutable_threshold_param()->CopyFrom(
         v1_layer_param.threshold_param());
@@ -913,6 +919,8 @@ const char* UpgradeV1LayerType(const V1LayerParameter_LayerType type) {
     return "Slice";
   case V1LayerParameter_LayerType_TANH:
     return "TanH";
+  case V1LayerParameter_LayerType_HTANH:
+    return "HTanH";
   case V1LayerParameter_LayerType_WINDOW_DATA:
     return "WindowData";
   case V1LayerParameter_LayerType_THRESHOLD:
